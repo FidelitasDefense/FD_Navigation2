@@ -85,7 +85,7 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
 
-    - name: Setup build fjj1
+    - name: Setup build fjj2
       run:  |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake
