@@ -91,7 +91,7 @@ jobs:
         sudo apt-get install -y build-essential cmake
         mkdir -p build
         cd build
-        cmake github.com/FidelitasDefense/FD_Navigation2/blob/main/navigation2/CMakeLists.txt
+        cmake ./navigation2/CMakeLists.txt
         make
    
     - if: matrix.build-mode == 'manual'
