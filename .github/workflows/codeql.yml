@@ -45,14 +45,28 @@ jobs:
           sudo rosdep init || true
           rosdep update
 
-      - name: Setup ROS workspace
+      - name: Set up ROS
         run: |
-          mkdir -p ~/nav2_ws/src
-          cd ~/nav2_ws/src
-          git clone https://github.com/ros-planning/navigation2.git
-          cd ~/nav2_ws
-          source /opt/ros/iron/setup.bash
-          rosdep install --from-paths src --ignore-src -r -y
+          sudo apt-get update
+          sudo apt-get install -y python3-rosdep
+          sudo rosdep init
+          rosdep update
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          libceres-dev \
+          libgraphicsmagick++1-dev \
+          graphicsmagick-libmagick-dev-compat \
+          lcov \
+          python3-zmq \
+          python3-typeshed \
+          libomp-dev || { echo "Failed to install dependencies"; exit 1; }
+
+      - name: Resolve ROS dependencies
+        run: |
+          rosdep install --from-paths src --ignore-src -r -y || { echo "rosdep install failed"; exit 1; } 
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
