@@ -31,6 +31,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up workspace
+        run: |
+          mkdir -p ~/nav2_ws/src
+          mv $GITHUB_WORKSPACE/* ~/nav2_ws/src/ || true # Move repo to workspace
+          cd ~/nav2_ws
+
       - name: Install ROS 2 Iron and dependencies
         run: |
           sudo apt update
@@ -45,28 +51,22 @@ jobs:
           sudo rosdep init || true
           rosdep update
 
-      - name: Set up ROS
+      - name: Install NAV2 dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-rosdep
-          sudo rosdep init
-          rosdep update
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-          libceres-dev \
-          libgraphicsmagick++1-dev \
-          graphicsmagick-libmagick-dev-compat \
-          lcov \
-          python3-zmq \
-          python3-typeshed \
-          libomp-dev || { echo "Failed to install dependencies"; exit 1; }
+          sudo apt update
+          sudo apt install -y \
+            libceres-dev \
+            libgraphicsmagick++1-dev \
+            graphicsmagick-libmagick-dev-compat \
+            lcov \
+            python3-zmq \
+            python3-typeshed \
+            libomp-dev || { echo "Failed to install dependencies"; exit 1; }
 
       - name: Resolve ROS dependencies
         run: |
-          rosdep install --from-paths src --ignore-src -r -y || { echo "rosdep install failed"; exit 1; } 
+          source /opt/ros/iron/setup.bash
+          rosdep install --from-paths ~/nav2_ws/src --ignore-src -r -y || { echo "rosdep install failed"; exit 1; }
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -76,11 +76,10 @@ jobs:
 
       - name: Manual Build (for C/C++)
         if: matrix.build-mode == 'manual'
-        shell: bash
         run: |
           source /opt/ros/iron/setup.bash
           cd ~/nav2_ws
-          colcon build
+          colcon build --symlink-install || { echo "colcon build failed"; exit 1; }
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
